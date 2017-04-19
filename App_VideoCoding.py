@@ -54,7 +54,7 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
             # ctrlキーを押した瞬間の時間を計測
             if event.key() == Qt.Key_Control:
                 self.press_time = time.time()  # keyを押した時点での時刻
-                print('Ctrl Pressed')
+                # print('Ctrl Pressed')
             else:
                 pass
         else:
@@ -70,7 +70,8 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
             # ctrlキーを押した瞬間の時間を計測
             if event.key() == Qt.Key_Control:
                 self.release_time = time.time()  # keyを離した時点での時刻
-                print('Ctrl Released' + str(self.time_count()))
+                self.time_count()
+                # print('Ctrl Released' + str(self.time_count()))
             else:
                 pass
         else:
@@ -103,7 +104,7 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
         else:
             self.Trial = "None"
 
-        print(self.switch)
+        # print(self.switch)
 
     # コーディングを終了する
     def stop_switch(self):
@@ -126,9 +127,9 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
         self.fp.write("\n")
         self.fp.flush()
 
-        print(self.switch)
-        print(self.durations_list)
-        print(total_duration)
+        # print(self.switch)
+        # print(self.durations_list)
+        # print(total_duration)
 
         # 初期化
         self.durations_list = []
