@@ -15,6 +15,7 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
     durations_list = []    # 複数回ボタンが押された時のdurationの仮置き場
     press_time = 0         # 時間の計測用
     release_time = 0       # 時間の計測用
+    pressing = False       # コーディングが始まってからボタンを押したかどうか
     ID = None              # 動画情報入力
     Trial = None           # 動画情報入力
     fp = None              # 出力用csvファイル
@@ -30,6 +31,8 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
         # ボタンを押す操作と関数のひも付け
         self.pushButton_Start.clicked.connect(self.start_switch)
         self.pushButton_Stop.clicked.connect(self.stop_switch)
+        # 最初はoffを押せないようにしておく
+        self.pushButton_Stop.setEnabled(False)
         # textBrowserにindexを追加
         self.textBrowser.append("[  ID  ] [  Trial  ] [  Duration  ]")
 
@@ -48,6 +51,9 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
     def keyPressEvent(self, event):
         # コーディングを開始しているときだけ反応
         if self.switch:
+            # ボタンを押したことを明示的に表現
+            self.pressing = True
+            self.label_Now.setText("Press")
             # 長押しのリピートを解除
             if event.isAutoRepeat():
                 return
@@ -63,14 +69,18 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
     # Qwidgetの組み込みの関数：ボタンを離した時
     def keyReleaseEvent(self, event):
         # コーディングを開始しているときだけ反応
-        if self.switch:
+        if self.switch and self.pressing:
+            # ボタン押しの状態
+            self.label_Now.setText("Release")
             # 長押しのリピートを解除
             if event.isAutoRepeat():
                 return
             # ctrlキーを押した瞬間の時間を計測
             if event.key() == Qt.Key_Control:
                 self.release_time = time.time()  # keyを離した時点での時刻
-                self.time_count()
+                self.time_count()                # keyを押していた間の時間を計算
+                # print(self.press_time)
+                # print(self.release_time)
                 # print('Ctrl Released' + str(self.time_count()))
             else:
                 pass
@@ -87,8 +97,11 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
     def start_switch(self):
         # on/off の切り替え
         self.switch = True
-        # onのときはボタンの色を変える
+        # onのときはボタンの色を変える、連続では押せないようにする
         self.pushButton_Start.setStyleSheet('background-color: #FFD25A')
+        self.pushButton_Start.setEnabled(False)
+        # Stopを押せるようにする
+        self.pushButton_Stop.setEnabled(True)
         # onのときは入力できないようにしておく
         self.lineEdit_ID.setEnabled(False)
         self.lineEdit_Trial.setEnabled(False)
@@ -105,13 +118,18 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
             self.Trial = "None"
 
         # print(self.switch)
+        # print(self.press_time)
+        # print(self.release_time)
 
     # コーディングを終了する
     def stop_switch(self):
         # on/off の切り替え
         self.switch = False
-        # offになったらボタンの色を戻す
+        # offになったらボタンの色を戻す,　また押せるように
         self.pushButton_Start.setStyleSheet('background-color: None')
+        self.pushButton_Start.setEnabled(True)
+        # Stopを押せないようにする
+        self.pushButton_Stop.setEnabled(False)
         # offのときは入力できるようにしておく
         self.lineEdit_ID.setEnabled(True)
         self.lineEdit_Trial.setEnabled(True)
@@ -132,6 +150,8 @@ class MainWindow(QMainWindow, ui_videocoding.Ui_VideoCoding):
         # print(total_duration)
 
         # 初期化
+        self.press_time = 0
+        self.release_time = 0
         self.durations_list = []
 
 
